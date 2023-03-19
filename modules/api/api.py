@@ -241,7 +241,7 @@ class Api:
         args.pop('save_images', None)
 
         with self.queue_lock:
-            p = StableDiffusionProcessingTxt2Img(sd_model=shared.sd_model, **args)
+            p = torch.compile(StableDiffusionProcessingTxt2Img(sd_model=shared.sd_model, **args), mode="reduce-overhead", backend="inductor")
             p.scripts = script_runner
             p.outpath_grids = opts.outdir_txt2img_grids
             p.outpath_samples = opts.outdir_txt2img_samples
@@ -295,7 +295,8 @@ class Api:
         args.pop('save_images', None)
 
         with self.queue_lock:
-            p = StableDiffusionProcessingImg2Img(sd_model=shared.sd_model, **args)
+            p = torch.compile(StableDiffusionProcessingImg2Img(sd_model=shared.sd_model, **args), mode="reduce-overhead", backend="inductor")
+            
             p.init_images = [decode_base64_to_image(x) for x in init_images]
             p.scripts = script_runner
             p.outpath_grids = opts.outdir_img2img_grids
